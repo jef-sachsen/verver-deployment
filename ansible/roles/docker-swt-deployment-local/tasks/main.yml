@@ -1,0 +1,42 @@
+---
+#tasks file for role
+- name: create folder swt inside docker home
+  become: true
+  file:
+    path: "{{ swt_path }}"
+    state: directory
+    mode: 0755
+  notify: rebuild_containers
+
+- name: Copy .env template
+  become: true
+  template:
+    src: .env
+    dest: "{{ swt_path }}/"
+    mode: 0644
+  notify: rebuild_containers
+
+- name: Copy db.env template
+  become: true
+  template:
+    src: db.env
+    dest: "{{ swt_path }}/"
+    mode: 0644
+  notify: rebuild_containers
+
+- name: Copy docker-compose.yml template
+  become: true
+  template:
+    src: docker-compose.yml
+    dest: "{{ swt_path }}/"
+    mode: 0644
+  notify: rebuild_containers
+
+- name: pull new images
+  become: true
+  docker_service:
+    project_src: "{{ swt_path }}/"
+    project_name: "swt-server"
+    state: present
+    pull: yes
+  notify: rebuild_containers
